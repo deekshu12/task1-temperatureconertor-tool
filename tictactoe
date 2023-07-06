@@ -1,61 +1,123 @@
 package deekshitha;
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.Scanner;
 
-public class currency {
-    private static final String API_KEY = "YOUR_API_KEY";
-    private static final String API_URL = "https://v6.exchangeratesapi.io/latest";
+public class tictactoe {
+    private static final int SIZE = 3;
+    private static final char EMPTY = ' ';
+    private static final char PLAYER_X = 'X';
+    private static final char PLAYER_O = 'O';
 
-    public static void main(String[] args) {
+    private char[][] board;
+    private char currentPlayer;
+
+    public tictactoe() {
+        board = new char[SIZE][SIZE];
+        currentPlayer = PLAYER_X;
+        initializeBoard();
+    }
+
+    private void initializeBoard() {
+        for (int row = 0; row < SIZE; row++) {
+            for (int col = 0; col < SIZE; col++) {
+                board[row][col] = EMPTY;
+            }
+        }
+    }
+
+    private void printBoard() {
+        for (int row = 0; row < SIZE; row++) {
+            for (int col = 0; col < SIZE; col++) {
+                System.out.print(board[row][col]);
+                if (col < SIZE - 1) {
+                    System.out.print(" | ");
+                }
+            }
+            System.out.println();
+            if (row < SIZE - 1) {
+                System.out.println("---------");
+            }
+        }
+    }
+
+    private void play() {
         Scanner scanner = new Scanner(System.in);
+        boolean gameFinished = false;
 
-        System.out.println("Currency Converter");
-        System.out.println("------------------");
+        System.out.println("Tic-Tac-Toe");
+        System.out.println("Enter row and column numbers (0-2) to make a move.");
 
-        System.out.print("Enter the base currency (e.g., USD): ");
-        String baseCurrency = scanner.nextLine().toUpperCase();
+        while (!gameFinished) {
+            System.out.println("\nCurrent Board:");
+            printBoard();
 
-        System.out.print("Enter the target currency (e.g., EUR): ");
-        String targetCurrency = scanner.nextLine().toUpperCase();
+            System.out.println("\nPlayer " + currentPlayer + "'s turn.");
+            System.out.print("Enter the row number: ");
+            int row = scanner.nextInt();
+            System.out.print("Enter the column number: ");
+            int col = scanner.nextInt();
 
-        System.out.print("Enter the amount to convert: ");
-        double amount = scanner.nextDouble();
+            if (isValidMove(row, col)) {
+                makeMove(row, col);
 
-        try {
-            double convertedAmount = convertCurrency(baseCurrency, targetCurrency, amount);
-            System.out.printf("%.2f %s = %.2f %s", amount, baseCurrency, convertedAmount, targetCurrency);
-        } catch (IOException e) {
-            System.out.println("An error occurred while fetching exchange rates.");
-            e.printStackTrace();
+                if (isWinningMove(row, col)) {
+                    System.out.println("\nPlayer " + currentPlayer + " wins!");
+                    gameFinished = true;
+                } else if (isBoardFull()) {
+                    System.out.println("\nThe game is a draw!");
+                    gameFinished = true;
+                } else {
+                    switchPlayer();
+                }
+            } else {
+                System.out.println("\nInvalid move. Please try again.");
+            }
         }
 
         scanner.close();
     }
 
-    private static double convertCurrency(String baseCurrency, String targetCurrency, double amount) throws IOException {
-        URL url = new URL(API_URL + "?access_key=" + API_KEY + "&base=" + baseCurrency);
-        HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-        connection.setRequestMethod("GET");
+    private boolean isValidMove(int row, int col) {
+        return row >= 0 && row < SIZE && col >= 0 && col < SIZE && board[row][col] == EMPTY;
+    }
 
-        int responseCode = connection.getResponseCode();
+    private void makeMove(int row, int col) {
+        board[row][col] = currentPlayer;
+    }
 
-        if (responseCode == HttpURLConnection.HTTP_OK) {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
-            String response = reader.readLine();
-
-            double targetRate = 1.0; 
-           
-            double convertedAmount = amount * targetRate;
-
-            reader.close();
-            return convertedAmount;
-        } else {
-            throw new IOException("Error response code: " + responseCode);
+    private boolean isWinningMove(int row, int col) {
+     
+        if (board[row][0] == currentPlayer && board[row][1] == currentPlayer && board[row][2] == currentPlayer) {
+            return true;
         }
+  
+        if (board[0][col] == currentPlayer && board[1][col] == currentPlayer && board[2][col] == currentPlayer) {
+            return true;
+        }
+       
+        if ((board[0][0] == currentPlayer && board[1][1] == currentPlayer && board[2][2] == currentPlayer) ||
+                (board[0][2] == currentPlayer && board[1][1] == currentPlayer && board[2][0] == currentPlayer)) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isBoardFull() {
+        for (int row = 0; row < SIZE; row++) {
+            for (int col = 0; col < SIZE; col++) {
+                if (board[row][col] == EMPTY) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private void switchPlayer() {
+        currentPlayer = (currentPlayer == PLAYER_X) ? PLAYER_O : PLAYER_X;
+    }
+
+    public static void main(String[] args) {
+    	tictactoe game = new tictactoe();
+        game.play();
     }
 }
-
